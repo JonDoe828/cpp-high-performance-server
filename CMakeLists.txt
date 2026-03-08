@@ -1,6 +1,6 @@
 #顶层Cmake，设置全局链接库以及添加子目录，和项目的头文件.h位置
 #设置最低版本和项目名称
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.16)
 project(kama-webserver)
 
 #设置全局的c++标准
@@ -23,3 +23,20 @@ set(LIBS
 add_subdirectory(src)
 add_subdirectory(memory)
 add_subdirectory(log)
+
+include(FetchContent)
+
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG v3.5.4
+)
+
+FetchContent_MakeAvailable(Catch2)
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+
+include(CTest)
+
+if(BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
