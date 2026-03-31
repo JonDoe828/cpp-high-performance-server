@@ -43,4 +43,5 @@
 /build/
 /bin/
 .cache/
+/lib/
 /compile_commands.json
