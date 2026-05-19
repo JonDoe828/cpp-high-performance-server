@@ -1,4 +1,6 @@
 #include "InetAddress.h"
+#include "Logger.h"
+
 #include <cstdint>
 #include <cstring>
 #include <netinet/in.h>
@@ -10,7 +12,9 @@ InetAddress::InetAddress(uint16_t port, std::string ip) {
   addr_.sin_family = AF_INET;
 
   addr_.sin_port = htons(port);
-  addr_.sin_addr.s_addr = inet_addr(ip.c_str());
+  if (::inet_pton(AF_INET, ip.c_str(), &addr_.sin_addr) <= 0) {
+    Logger::error("InetAddress invalid ip: " + ip);
+  }
 }
 
 InetAddress::InetAddress(const sockaddr_in &addr) : addr_(addr) {}
@@ -21,11 +25,11 @@ std::string InetAddress::toIp() const {
   return buf;
 }
 
-uint16_t InetAddress::toPort() const { return ::ntohs(addr_.sin_port); }
-
 std::string InetAddress::toIpPort() const {
   return toIp() + ":" + std::to_string(toPort());
 }
+
+uint16_t InetAddress::toPort() const { return ::ntohs(addr_.sin_port); }
 
 const sockaddr_in *InetAddress::getSockAddr() const { return &addr_; }
 void InetAddress::setSockAddr(const sockaddr_in &addr) { addr_ = addr; }

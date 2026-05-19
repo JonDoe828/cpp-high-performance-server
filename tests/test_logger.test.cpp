@@ -10,3 +10,8 @@ TEST_CASE("Logger handles empty message") {
   REQUIRE_NOTHROW(Logger::info(""));
   REQUIRE_NOTHROW(Logger::error(""));
 }
+
+TEST_CASE("Logger supports stream style logging") {
+  REQUIRE_NOTHROW([] { LOG_INFO << "fd=" << 3; }());
+  REQUIRE_NOTHROW([] { LOG_WARN << "cache ttl=" << 10; }());
+}

@@ -1,0 +1,78 @@
+#include "Channel.h"
+
+#include <sys/epoll.h>
+
+const int Channel::kNoneEvent = 0;
+const int Channel::kReadEvent = EPOLLIN | EPOLLPRI;
+const int Channel::kWriteEvent = EPOLLOUT;
+
+Channel::Channel(EventLoop *loop, int fd)
+    : loop_(loop), fd_(fd), events_(0), revents_(0), index_(-1) {}
+
+Channel::~Channel() = default;
+
+void Channel::handleEvent(Timestamp receiveTime) {
+  handleEventWithGuard(receiveTime);
+}
+
+void Channel::handleEventWithGuard(Timestamp receiveTime) {
+  if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN)) {
+    if (closeCallback_) {
+      closeCallback_();
+    }
+  }
+
+  if (revents_ & EPOLLERR) {
+    if (errorCallback_) {
+      errorCallback_();
+    }
+  }
+
+  if (revents_ & (EPOLLIN | EPOLLPRI)) {
+    if (readCallback_) {
+      readCallback_(receiveTime);
+    }
+  }
+
+  if (revents_ & EPOLLOUT) {
+    if (writeCallback_) {
+      writeCallback_();
+    }
+  }
+}
+
+void Channel::enableReading() {
+  events_ |= kReadEvent;
+  update();
+}
+
+void Channel::disableReading() {
+  events_ &= ~kReadEvent;
+  update();
+}
+
+void Channel::enableWriting() {
+  events_ |= kWriteEvent;
+  update();
+}
+
+void Channel::disableWriting() {
+  events_ &= ~kWriteEvent;
+  update();
+}
+
+void Channel::disableAll() {
+  events_ = kNoneEvent;
+  update();
+}
+
+bool Channel::isNoneEvent() const { return events_ == kNoneEvent; }
+
+bool Channel::isWriting() const { return events_ & kWriteEvent; }
+
+bool Channel::isReading() const { return events_ & kReadEvent; }
+
+void Channel::update() {
+  // 下一步写 EventLoop 后，这里会变成：
+  // loop_->updateChannel(this);
+}

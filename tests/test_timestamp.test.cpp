@@ -15,3 +15,12 @@ TEST_CASE("Timestamp increases over time") {
 
   REQUIRE(t2.microSecondsSinceEpoch() >= t1.microSecondsSinceEpoch());
 }
+
+TEST_CASE("Timestamp supports cache-style time arithmetic") {
+  auto start = Timestamp::now();
+  auto expireAt = addTime(start, 2.5);
+
+  REQUIRE(start.valid());
+  REQUIRE(expireAt > start);
+  REQUIRE(timeDifference(expireAt, start) == 2.5);
+}

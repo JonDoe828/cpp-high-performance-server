@@ -1,5 +1,7 @@
 #include "Socket.h"
 #include "InetAddress.h"
+#include "Logger.h"
+
 #include <netinet/tcp.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -11,8 +13,11 @@ Socket::~Socket() { ::close(sockfd_); }
 int Socket::fd() const { return sockfd_; }
 
 void Socket::bindAddress(const InetAddress &localaddr) {
-  ::bind(sockfd_, reinterpret_cast<const sockaddr *>(localaddr.getSockAddr()),
-         sizeof(sockaddr_in));
+  if (::bind(sockfd_,
+             reinterpret_cast<const sockaddr *>(localaddr.getSockAddr()),
+             sizeof(sockaddr_in)) < 0) {
+    Logger::error("Socket::bindAddress failed");
+  }
 }
 
 void Socket::listen() { ::listen(sockfd_, 1024); }
