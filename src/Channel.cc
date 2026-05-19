@@ -1,4 +1,5 @@
 #include "Channel.h"
+#include "EventLoop.h"
 
 #include <sys/epoll.h>
 
@@ -73,6 +74,13 @@ bool Channel::isWriting() const { return events_ & kWriteEvent; }
 bool Channel::isReading() const { return events_ & kReadEvent; }
 
 void Channel::update() {
-  // 下一步写 EventLoop 后，这里会变成：
-  // loop_->updateChannel(this);
+  if (loop_) {
+    loop_->updateChannel(this);
+  }
+}
+
+void Channel::remove() {
+  if (loop_) {
+    loop_->removeChannel(this);
+  }
 }
