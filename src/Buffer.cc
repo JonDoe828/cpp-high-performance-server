@@ -10,8 +10,7 @@ const char kCRLF[] = "\r\n";
 } // namespace
 
 Buffer::Buffer(size_t initialSize)
-    : buffer_(kCheapPrepend + initialSize),
-      readerIndex_(kCheapPrepend),
+    : buffer_(kCheapPrepend + initialSize), readerIndex_(kCheapPrepend),
       writerIndex_(kCheapPrepend) {}
 
 size_t Buffer::readableBytes() const { return writerIndex_ - readerIndex_; }
