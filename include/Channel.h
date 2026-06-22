@@ -23,6 +23,8 @@ public:
   void setCloseCallback(EventCallback cb) { closeCallback_ = std::move(cb); }
   void setErrorCallback(EventCallback cb) { errorCallback_ = std::move(cb); }
 
+  void tie(const std::shared_ptr<void> &owner);
+
   int fd() const { return fd_; }
   int events() const { return events_; }
   void setRevents(int revents) { revents_ = revents; }
@@ -58,6 +60,9 @@ private:
   int events_;
   int revents_;
   int index_;
+
+  std::weak_ptr<void> tie_;
+  bool tied_;
 
   ReadEventCallback readCallback_;
   EventCallback writeCallback_;

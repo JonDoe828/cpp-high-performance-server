@@ -8,12 +8,29 @@ const int Channel::kReadEvent = EPOLLIN | EPOLLPRI;
 const int Channel::kWriteEvent = EPOLLOUT;
 
 Channel::Channel(EventLoop *loop, int fd)
-    : loop_(loop), fd_(fd), events_(0), revents_(0), index_(-1) {}
+    : loop_(loop),
+      fd_(fd),
+      events_(0),
+      revents_(0),
+      index_(-1),
+      tied_(false) {}
 
 Channel::~Channel() = default;
 
 void Channel::handleEvent(Timestamp receiveTime) {
-  handleEventWithGuard(receiveTime);
+  if (tied_) {
+    std::shared_ptr<void> guard = tie_.lock();
+    if (guard) {
+      handleEventWithGuard(receiveTime);
+    }
+  } else {
+    handleEventWithGuard(receiveTime);
+  }
+}
+
+void Channel::tie(const std::shared_ptr<void> &owner) {
+  tie_ = owner;
+  tied_ = true;
 }
 
 void Channel::handleEventWithGuard(Timestamp receiveTime) {
