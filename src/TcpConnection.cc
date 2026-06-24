@@ -48,21 +48,27 @@ bool TcpConnection::disconnected() const { return state_ == kDisconnected; }
 
 void TcpConnection::send(const std::string &message) {
   if (state_ == kConnected) {
-    sendInLoop(message.data(), message.size());
+    if (loop_->isInLoopThread()) {
+      sendInLoop(message.data(), message.size());
+    } else {
+      loop_->runInLoop(
+          [this, message] { sendInLoop(message.data(), message.size()); });
+    }
   }
 }
 
 void TcpConnection::send(Buffer *message) {
   if (state_ == kConnected) {
-    sendInLoop(message->peek(), message->readableBytes());
+    std::string bytes(message->peek(), message->readableBytes());
     message->retrieveAll();
+    send(bytes);
   }
 }
 
 void TcpConnection::shutdown() {
   if (state_ == kConnected) {
     setState(kDisconnecting);
-    shutdownInLoop();
+    loop_->runInLoop([this] { shutdownInLoop(); });
   }
 }
 
