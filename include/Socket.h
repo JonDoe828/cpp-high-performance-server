@@ -20,5 +20,6 @@ public:
   void setKeepAlive(bool on);
 
 private:
-  const int sockfd_;
+  const int
+      sockfd_; // Socket 是 fd 封装,socket 本质就是一个文件描述符，类型是 in
 };

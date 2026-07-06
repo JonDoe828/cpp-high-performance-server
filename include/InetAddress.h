@@ -16,5 +16,5 @@ public:
   void setSockAddr(const sockaddr_in &addr);
 
 private:
-  sockaddr_in addr_;
+  sockaddr_in addr_; // sockaddr_in 是 Linux IPv4 地址结构
 };

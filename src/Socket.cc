@@ -12,6 +12,9 @@ Socket::~Socket() { ::close(sockfd_); }
 
 int Socket::fd() const { return sockfd_; }
 
+// Socket::bindAddress: 绑定地址
+// 作用：把 socket fd 绑定到某个 IP + port。
+// 比如绑定到 0.0.0.0 : 8080，意思就是这个 fd 负责监听 8080 端口
 void Socket::bindAddress(const InetAddress &localaddr) {
   if (::bind(sockfd_,
              reinterpret_cast<const sockaddr *>(localaddr.getSockAddr()),
